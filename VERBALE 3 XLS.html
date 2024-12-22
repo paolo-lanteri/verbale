@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>SOPRALLUOGO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Essenziale per il design responsivo -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="datetime-local"], textarea {
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 5px; 
+        }
+        input[type="submit"], button {
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 10px 15px; 
+            border: none; 
+            cursor: pointer; 
+            margin-top: 20px; 
+        }
+        input[type="submit"]:hover, button:hover {
+            background-color: #45a049;
+        }
+
+        /* Media queries per migliorare la responsività su dispositivi più piccoli */
+        @media (max-width: 768px) {
+            body { padding: 5px; }
+            input[type="text"], input[type="datetime-local"], textarea {
+                padding: 10px; 
+                font-size: 16px;  /* Dimensioni del testo più grandi per una migliore leggibilità */
+            }
+            .form-group {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>SOPRALLUOGO</h1>
+    <h2>DATI GENERALI</h2>
+    <div>
+        <label for="collaboratore">Collaboratore:</label>
+        <input type="text" id="collaboratore" value="Lanteri Paolo">
+        <label for="protocollo">Protocollo:</label>
+        <input type="text" id="protocollo">
+        <label for="contraente">Contraente:</label>
+        <input type="text" id="contraente">
+        <label for="sinistro">Sinistro:</label>
+        <input type="text" id="sinistro">
+        <label for="sopralluogo">Sopralluogo:</label>
+        <input type="datetime-local" id="sopralluogo">
+        <h2>PREESISTENZA</h2>
+        <label for="tipologiaImmobile">Tipologia di Immobile:</label>
+        <input type="text" id="tipologiaImmobile">
+        <label for="descrizioneSinistro">Descrizione del Sinistro:</label>
+        <textarea id="descrizioneSinistro"></textarea>
+        <label for="stimaDanni">Stima Danni:</label>
+        <textarea id="stimaDanni"></textarea>
+        <button type="button" onclick="generateExcel()">Genera Excel</button>
+    </div>
+
+    <script>
+        function generateExcel() {
+            var wb = XLSX.utils.book_new();
+            wb.Props = {
+                Title: "Sopralluogo",
+                Subject: "Report",
+                Author: "Admin",
+                CreatedDate: new Date()
+            };
+            wb.SheetNames.push("Sopralluogo");
+            var ws_data = [
+                ["Collaboratore", document.getElementById('collaboratore').value],
+                ["Protocollo", document.getElementById('protocollo').value],
+                ["Contraente", document.getElementById('contraente').value],
+                ["Sinistro", document.getElementById('sinistro').value],
+                ["Sopralluogo", document.getElementById('sopralluogo').value],
+                ["Tipologia Immobile", document.getElementById('tipologiaImmobile').value],
+                ["Descrizione del Sinistro", document.getElementById('descrizioneSinistro').value],
+                ["Stima Danni", document.getElementById('stimaDanni').value]
+            ];
+            var ws = XLSX.utils.aoa_to_sheet(ws_data);
+            wb.Sheets["Sopralluogo"] = ws;
+            var wbout = XLSX.write(wb, {bookType:'xlsx', type: 'binary'});
+            function s2ab(s) {
+                var buf = new ArrayBuffer(s.length);
+                var view = new Uint8Array(buf);
+                for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+                return buf;
+            }
+            var protocollo = document.getElementById('protocollo').value;
+            var contraente = document.getElementById('contraente').value.replace(/\s+/g, '_');
+            var fileName = 'Sopralluogo_' + protocollo + '_' + contraente + '.xlsx';
+            saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), fileName);
+        }
+    </script>
+</body>
+</html>
